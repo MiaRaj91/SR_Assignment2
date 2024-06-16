@@ -1,0 +1,89 @@
+---
+title: "ANA 515 Assignment 2"
+author: "Saumya Rajamohan"
+date: "`r Sys.Date()`"
+output: word_document
+---
+```{r setup, echo=TRUE}
+#echo = TRUE allows code to show up in final result
+library(magrittr)
+library(tidyverse)
+library(dplyr)
+```
+#Section 1: Data Description
+
+The dataset includes responses to a survey monkey questionnaire from around 1615 adult men, and explores their opinions behind all that entails masculinity. Most questions on the survey were multi-select multiple choice questions, while some were open ended that is not reflected in this dataset. The survey answers questions around the general perception of masculinity among men and their attitude towards being in vulnerable situations like asking for help, seeking therapy etc. It further explores their experience as a male at the work space, especially during the #MeToo movement. It also tries to assess actions taken if any to incidents of sexual harassment if witnessed at the workplace.It would like to use this survey to understand if there is an association between men's ideas about masculinity and their knowledge and willingness to support the #MeToo Movement.
+The file is saved as a CSV file. It is a delimited flat file, where commas are used to separate every column (i.e. survey question) for each survey respondent.
+
+```{r, echo=TRUE}
+# Section 2: Reading data into R
+
+#The read.csv function was used to read the data from a url. This R function can read delimited flat files with comma separated values.
+#read.csv is found within the Tidyverse package
+
+raw <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/masculinity-survey/raw-responses.csv"
+survey <- read.csv(raw)
+
+```
+
+```{r, echo=TRUE}
+# Section 3: Clean the Data
+
+#Subset the dataset by selecting some columns
+#Rename columns
+subsurvey<- survey %>% 
+  select(q0001, q0002, q0005, q0009, q0014, q0015, weight) %>% 
+  rename("SelfPerception"="q0001", "ExternalPerception"="q0002", "SocietalPressure"="q0005", "Employment"="q0009", "MeTooAwareness"="q0014", "MeTooResponse"="q0015", "Weight"="weight")
+
+```
+
+```{r, echo=TRUE}
+# Section 4a: Characteristics of data
+#Inline code
+library(knitr)
+``` 
+This dataframe has `r nrow(subsurvey)` rows and `r ncol(subsurvey)` columns. The names of the columns and a brief description of each are in the table below:
+
+```{r, echo= TRUE, results = TRUE}
+# Section 4b: Characteristics of data
+#Description table
+library(knitr)
+columns_summary <- data.frame(
+Column_Name = c(colnames(subsurvey)),
+Column_Description = c(
+"In general, how masculine or manly do you feel?", "How important is it to you that others see you as masculine?", "Do you think that society puts pressure on men in a way that is unhealthy or bad for them?", "Which of the following categories best describes your employment status?","AMONG EMPLOYED: How much have you heard about the #MeToo movement?", "AMONG EMPLOYED WHO'VE HEARD OF METOO: As a man, would you say you think about your behavior at work differently in the wake of #MeToo?", "Weightage")
+)
+
+kable(columns_summary, caption = "Masculinity Survey Dataframe Description Table")
+```
+
+```{r, echo=TRUE}
+# Section 5a: Summary Statistics, including missing values
+
+#Subset dataframe to 3 columns
+survey3<-select(subsurvey,SelfPerception, MeTooAwareness, Weight)
+
+#Summarize columns
+surveysummary<-summary(survey3)
+print(surveysummary)
+
+#As the summary function does not show missing values for character variables by default, rewriting a code to summarize the 3 selected columns by factorizing the character variables
+
+surveysummary2<-survey3 %>% 
+              mutate(across(where(is.character), factor))
+surveysummarymissing <-summary(surveysummary2)
+print(surveysummarymissing)
+
+# Section 5b: Summary Statistics, excluding missing values
+
+#Filter out rows with missing values
+surveysummary3 <- na.omit(survey3)
+miss<- summary(surveysummary3)
+print(miss)
+
+#Factorize character variables and summarize the 3 selected variables
+surveysummarycomplete<-surveysummary3 %>% 
+              mutate(across(where(is.character), factor))
+surveysummarynomissing <-summary(surveysummarycomplete)
+print(surveysummarynomissing)
+``` 
